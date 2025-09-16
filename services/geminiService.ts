@@ -1,12 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { Category } from "../components/CategorySelector";
 
-// Ensure the API key is available
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialize with an empty string if the key is missing to prevent a crash on load.
+// The key will be checked before any API call is made.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
 
 export interface Source {
   uri: string;
@@ -127,6 +124,10 @@ export const fetchScriptFromGemini = async (
   newsTopic: string,
   category: Category
 ): Promise<{ script: string; sources: Source[] }> => {
+  if (!process.env.API_KEY) {
+    throw new Error("La API KEY de Google no está configurada. Asegúrate de que la variable de entorno esté disponible.");
+  }
+  
   const model = "gemini-2.5-flash";
   const prompt = getPromptForCategory(newsTopic, category);
 

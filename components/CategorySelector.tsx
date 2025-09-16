@@ -6,6 +6,7 @@ export type Category = 'football' | 'news' | 'entertainment' | 'funFacts' | 'mov
 interface CategorySelectorProps {
   selectedCategory: Category;
   onSelectCategory: (category: Category) => void;
+  disabled?: boolean;
 }
 
 const categories: { id: Category; label: string; icon: JSX.Element, color: string }[] = [
@@ -59,21 +60,22 @@ const categories: { id: Category; label: string; icon: JSX.Element, color: strin
   },
 ];
 
-export const CategorySelector: React.FC<CategorySelectorProps> = ({ selectedCategory, onSelectCategory }) => {
+export const CategorySelector: React.FC<CategorySelectorProps> = ({ selectedCategory, onSelectCategory, disabled = false }) => {
   return (
-    <div className="grid grid-cols-4 sm:grid-cols-8 gap-4">
+    <div className={`grid grid-cols-4 sm:grid-cols-8 gap-4 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
       {categories.map(({ id, label, icon, color }) => (
         <button
           key={id}
           onClick={() => onSelectCategory(id)}
-          className="flex flex-col items-center gap-2 text-brand-light font-medium transition-transform duration-200 transform hover:scale-110 focus:outline-none"
+          className="flex flex-col items-center gap-2 text-brand-light font-medium transition-transform duration-200 transform hover:scale-110 focus:outline-none disabled:transform-none disabled:cursor-not-allowed"
           aria-pressed={selectedCategory === id}
+          disabled={disabled}
         >
           <div className={`
             w-16 h-16 rounded-full flex items-center justify-center
             transition-all duration-200
             ${color}
-            ${selectedCategory === id ? 'ring-2 ring-brand-primary ring-offset-2 ring-offset-brand-dark' : 'ring-2 ring-transparent'}
+            ${selectedCategory === id && !disabled ? 'ring-2 ring-brand-primary ring-offset-2 ring-offset-brand-dark' : 'ring-2 ring-transparent'}
           `}>
             {icon}
           </div>

@@ -11,6 +11,7 @@ import { CategorySelector, Category } from './components/CategorySelector';
 
 function App() {
   const [currentCategory, setCurrentCategory] = useState<Category>('football');
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
 
   const {
     newsTopic,
@@ -24,8 +25,18 @@ function App() {
 
   const { savedScripts, addScript, deleteScript } = useSavedScripts();
 
+  useEffect(() => {
+    // Check for API Key on initial load
+    if (!process.env.API_KEY) {
+      setApiKeyError(
+        "Falta la API KEY de Google. La aplicación no funcionará hasta que se configure correctamente en el entorno."
+      );
+    }
+  }, []);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (apiKeyError) return;
     generateScript(currentCategory);
   };
 
@@ -45,15 +56,25 @@ function App() {
     setNewsTopic(''); // Clear topic when changing category
   };
 
+  const isUiDisabled = isLoading || !!apiKeyError;
+
   return (
     <div className="bg-brand-dark min-h-screen text-brand-light font-sans">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <Header />
 
+        {apiKeyError && (
+          <div className="bg-red-900/50 border border-red-600 text-red-300 px-4 py-3 rounded-lg relative mt-6" role="alert">
+            <strong className="font-bold">Error de Configuración: </strong>
+            <span className="block sm:inline ml-2">{apiKeyError}</span>
+          </div>
+        )}
+
         <main className="mt-10">
           <CategorySelector 
             selectedCategory={currentCategory} 
-            onSelectCategory={handleCategoryChange} 
+            onSelectCategory={handleCategoryChange}
+            disabled={!!apiKeyError}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
@@ -62,7 +83,7 @@ function App() {
                 newsTopic={newsTopic}
                 setNewsTopic={setNewsTopic}
                 onSubmit={handleSubmit}
-                isLoading={isLoading}
+                isLoading={isUiDisabled}
                 category={currentCategory}
               />
             </div>
@@ -78,7 +99,7 @@ function App() {
 
           <ViralNews 
             onTopicSelect={handleTopicSelect} 
-            isLoading={isLoading} 
+            isLoading={isUiDisabled} 
             category={currentCategory}
           />
 
